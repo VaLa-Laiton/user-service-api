@@ -1,7 +1,3 @@
-Aquí tienes una descripción bien estructurada para tu repositorio en **GitHub**:
-
----
-
 # **User Service API 🚀**  
 📌 **Microservicio de Gestión de Usuarios - Python, FastAPI, MongoDB, Docker**  
 
