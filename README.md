@@ -1,10 +1,13 @@
 # **User Service API 🚀**  
+
 📌 **Microservicio de Gestión de Usuarios - Python, FastAPI, MongoDB, Docker**  
 
 ## **Descripción**  
+
 Este repositorio contiene un **microservicio REST API** para la gestión de usuarios, incluyendo autenticación, autorización y manejo de roles. Construido con **FastAPI**, utiliza **MongoDB** como base de datos y está completamente **contenedorizado con Docker** para facilitar su despliegue.  
 
 ## **Características**  
+
 ✅ **FastAPI**: Framework rápido y moderno para APIs en Python.  
 ✅ **Autenticación con JWT**: Manejo seguro de tokens para acceso de usuarios.  
 ✅ **MongoDB**: Base de datos NoSQL escalable para almacenamiento de usuarios.  
@@ -14,6 +17,7 @@ Este repositorio contiene un **microservicio REST API** para la gestión de usua
 ✅ **Pruebas Automáticas**: Unit tests con `pytest` y `mongomock`.  
 
 ## **Tecnologías Utilizadas**  
+
 🔹 **Lenguaje**: Python 3.x  
 🔹 **Framework**: FastAPI  
 🔹 **Base de Datos**: MongoDB  
@@ -26,30 +30,40 @@ Este repositorio contiene un **microservicio REST API** para la gestión de usua
 ## **Instalación y Uso 🚀**  
 
 ### **Requisitos Previos**  
+
 🔹 Tener **Docker** y **Docker Compose** instalados.  
 🔹 Clonar este repositorio:  
+
 ```bash
 git clone https://github.com/tu-usuario/user-service-api.git
 cd user-service-api
 ```
 
 ### **Ejecutar con Docker**  
+
 ```bash
 docker-compose up --build
 ```
+
 La API estará disponible en **`http://localhost:8000/docs`** con documentación interactiva Swagger.
 
 ### **Ejecutar en Local (sin Docker)**  
+
 1️⃣ Instalar dependencias:  
+
 ```bash
 pip install -r requirements.txt
 ```
+
 2️⃣ Configurar variables de entorno (`.env`):  
+
 ```env
 MONGO_URI=mongodb://localhost:27017/users_db
 JWT_SECRET=supersecreto
 ```
+
 3️⃣ Ejecutar la API:  
+
 ```bash
 uvicorn app.main:app --reload
 ```
@@ -67,12 +81,15 @@ uvicorn app.main:app --reload
 ⚡ **Más detalles disponibles en** `http://localhost:8000/docs`
 
 ## **Pruebas**  
+
 Ejecutar pruebas unitarias con:
+
 ```bash
 pytest
 ```
 
 ## **Licencia**  
+
 Este proyecto está bajo la licencia **Business Source License (BUSL-1.1)**.  
 🔒 **Uso comercial no permitido sin autorización.** Contacta al autor para licencias comerciales.
 
