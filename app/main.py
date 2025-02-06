@@ -1,39 +1,35 @@
-import uvicorn
-from fastapi import FastAPI
-from app.db import mongodb 
+"""
+Módulo principal de la aplicación User Service API.
 
+Este módulo inicializa la instancia de FastAPI, configura el middleware
+para agregar un encabezado que indica el tiempo de procesamiento de la solicitud,
+e incluye los routers responsables de manejar los endpoints principales, de
+autenticación y de gestión de usuarios.
+
+La estructura del código sigue los principios de separación de responsabilidades
+y modularidad, facilitando su mantenimiento y escalabilidad.
+"""
+
+from fastapi import FastAPI
+from app.routers import main_routes, auth_routes, users_routes
+from app.middlewares import main_middleware, auth_middleware  # auth_middleware importado pero sin uso en este ejemplo
+
+# Inicialización de la instancia de FastAPI.
 app = FastAPI()
 
-@app.get("/")
-def welcome():
-    return {"Mensaje": "Hola, que tal? Bienvenido a user-service-api"}
+# Configuración del middleware.
+# Este middleware añade un encabezado HTTP a cada respuesta con el tiempo de procesamiento
+# de la solicitud, lo cual es útil para la monitorización y optimización del rendimiento.
+app.middleware("http")(main_middleware.add_process_time_header)
 
+# Inclusión del router principal.
+# Este router gestiona los endpoints básicos y generales de la aplicación.
+app.include_router(main_routes.router)
 
-@app.get("/ping")
-async def ping():
-    return await mongodb.check_connection()
+# Inclusión del router de autenticación.
+# Este router maneja la autenticación de usuarios, la emisión y validación de tokens, etc.
+app.include_router(auth_routes.router)
 
-
-@app.post("/auth/register")
-def auth_register():
-    return {"Mensaje": "Esta es el end-point para registrar el usuario"}
-
-
-@app.post("/auth/login")
-def auth_login():
-    return {"Mensaje": "Esta es el end-point para que un usuario inicie sesión"}
-
-
-@app.get("/users/me")
-def users_me():
-    return {"Mensaje": "Esta es el end-point para obtener la data del usuario autenticado"}
-
-
-@app.get("/users")
-def users_all():
-    return {"Mensaje": "Esta es el end-point para listar todos los usuarios existentes (Requiere permisos)"}
-
-
-@app.put("/users/{id}")
-def users_by_id():
-    return {"Mensaje": "Esta es el end-point para modificar/editar los datos de un usuario"}
+# Inclusión del router de gestión de usuarios.
+# Este router proporciona operaciones CRUD y otras funcionalidades relacionadas con los usuarios.
+app.include_router(users_routes.router)
