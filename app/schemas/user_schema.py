@@ -1,4 +1,5 @@
 from pydantic import BaseModel, Field
+from app.models.userRoles import UserRole
 from typing import Optional
 
 class UserCreate(BaseModel):
@@ -16,13 +17,8 @@ class UserCreate(BaseModel):
     password: str = Field(..., description="Contraseña en texto plano.")
     avatar_url: str = Field(..., description="URL de la foto de perfil del usuario.")
     state: str = Field("active", description="Estado del usuario: active, inactive o banned.")
-    user_role: str = Field(..., description="Rol del usuario en el sistema.")
+    user_role: UserRole = Field(UserRole.TECHNICAL, description="Rol del usuario en el sistema.")
     is_active: bool = Field(True, description="Indica si el usuario está activo.")
-    last_login: Optional[str] = Field(None, description="Fecha y hora del último inicio de sesión en formato ISO.")
-    created_at: Optional[str] = Field(None, description="Fecha y hora de creación del usuario en formato ISO.")
-    updated_at: Optional[str] = Field(None, description="Fecha y hora de la última actualización en formato ISO.")
-    deleted_at: Optional[str] = Field(None, description="Fecha de eliminación (si aplica) en formato ISO.")
-    is_deleted: bool = Field(False, description="Indica si el usuario ha sido eliminado.")
 
     model_config = {
         "json_schema_extra": {
@@ -36,12 +32,7 @@ class UserCreate(BaseModel):
                 "avatar_url": "https://example.com/avatar.png",
                 "state": "active",
                 "user_role": "technical",
-                "is_active": True,
-                "last_login": None,
-                "created_at": "2025-02-06T10:07:51.261507-05:00",
-                "updated_at": "2025-02-06T10:07:51.261551-05:00",
-                "deleted_at": None,
-                "is_deleted": False
+                "is_active": True
             },
             "validation_info": {
                 "note": "Las siguientes propiedades tienen una validación independiente antes de ser enviadas al modelo:",

@@ -12,13 +12,29 @@ def isValid_user_data(user_data: dict) -> dict:
     Valida los datos de un usuario según el esquema proporcionado.
 
     Para cada campo presente en el diccionario `user_data`, se invoca el validador correspondiente.
-    Los validadores retornan un diccionario con el estado de validación (por ejemplo, 'isValid').
+    Cada validador retorna un diccionario con la siguiente estructura:
+        {
+            "isValid": bool,  # Indica si el campo es válido.
+            "message": str    # Mensaje explicativo sobre la validación.
+        }
+
+    Ejemplo de salida (cuando todos los campos son válidos):
+        {
+            'username': {'isValid': True, 'message': 'El nombre de usuario es válido.'},
+            'password': {'isValid': True, 'message': 'La contraseña es válida.'},
+            'full_name': {'isValid': True, 'message': 'El nombre completo es válido.'},
+            'email': {'isValid': True, 'message': 'El correo electrónico es válido.'},
+            'phone_number': {'isValid': True, 'message': 'El número de teléfono es válido.'},
+            'avatar_url': {'isValid': True, 'message': 'La URL de la foto de perfil es válida.'}
+        }
 
     Args:
         user_data (dict): Diccionario con los datos del usuario a validar.
 
     Returns:
-        dict: Diccionario donde cada clave es un campo y el valor es el resultado de su validación.
+        dict: Diccionario donde cada clave corresponde a un campo del usuario y su valor es un
+              diccionario con las claves "isValid" (bool) y "message" (str) que indican el resultado
+              de la validación para ese campo.
     """
     validations = {}
 

@@ -27,9 +27,9 @@ app.middleware("http")(main_middleware.add_process_time_header)
 app.include_router(main_routes.router)
 
 # Inclusión del router de autenticación.
-# Este router maneja la autenticación de usuarios, la emisión y validación de tokens, etc.
+# Este router maneja la autenticación de usuarios, la emisión y validación de tokens (Registro, Login).
 app.include_router(auth_routes.router)
 
 # Inclusión del router de gestión de usuarios.
-# Este router proporciona operaciones CRUD y otras funcionalidades relacionadas con los usuarios.
+# Este router proporciona funcionalidades relacionadas con los usuarios.
 app.include_router(users_routes.router)

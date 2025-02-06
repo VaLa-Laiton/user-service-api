@@ -60,3 +60,35 @@ async def create_user(user_data: dict):
 
     except Exception as e:
         return {"success": False, "error": "Error al guardar el usuario", "details": str(e)}
+
+async def check_user_exists(email: str, phone_number: int) -> dict:
+    """
+    Verifica si el email o el número de teléfono ya están registrados en la base de datos.
+
+    Args:
+        email (str): Correo electrónico a verificar.
+        phone_number (int): Número de teléfono a verificar.
+
+    Returns:
+        dict: Diccionario con la siguiente estructura:
+            - "exists": True si el usuario ya está registrado, False si no lo está.
+            - "field": Indica cuál campo es duplicado ("email" o "phone_number"), o None si no hay coincidencias.
+            - "error": (Opcional) Mensaje de error en caso de excepción.
+    """
+    try:
+        # Buscar en la colección "users" si existe un usuario con el email o el número de teléfono proporcionado
+        existing_user = await db["users"].find_one(
+            {"$or": [{"email": email}, {"phone_number": phone_number}]}
+        )
+
+        if existing_user:
+            # Determinar qué campo presenta duplicación
+            duplicated_field = "email" if existing_user["email"] == email else "phone_number"
+            return {"exists": True, "field": duplicated_field}
+
+        # Retornar que no existe duplicado
+        return {"exists": False, "field": None}
+
+    except Exception as e:
+        # En caso de error, se retorna el mensaje de error junto con exists en False
+        return {"exists": False, "error": str(e)}
