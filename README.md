@@ -27,7 +27,7 @@ Este repositorio contiene un **microservicio REST API** para la gestión de usua
 🔹 **Testing**: pytest, mongomock  
 🔹 **Logs**: Loguru  
 
-## **Instalación y Uso 🚀**  
+<!-- ## **Instalación y Uso 🚀**  
 
 ### **Requisitos Previos**  
 
@@ -98,4 +98,4 @@ Este proyecto está bajo la licencia **Business Source License (BUSL-1.1)**.
 🔹 **Contribuciones**: Abiertas para mejoras, pero con restricciones comerciales.  
 🔹 **Contacto**: [Tu correo o GitHub Profile]  
 
-📌 **Si necesitas una API escalable y segura para autenticación de usuarios, este microservicio es para ti. 🚀**
+📌 **Si necesitas una API escalable y segura para autenticación de usuarios, este microservicio es para ti. 🚀** -->
