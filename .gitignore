@@ -1,5 +1,17 @@
+# Ignorar todos los entornos virtuales
 venv/
+
+# Ignorar archivos de configuración local
 .env
+
+# Ignorar directorios __pycache__ en cualquier parte del proyecto
 **/__pycache__/
-app/__pycache__
+__pycache__/
+
+# Ignorar archivos compilados de Python
+*.pyc
+*.pyo
+*.pyd
+
+# Ignorar claves privadas
 *.pem
