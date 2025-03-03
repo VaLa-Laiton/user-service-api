@@ -1,35 +1,38 @@
 """
-Módulo de conexión a la base de datos MongoDB utilizando Motor (AsyncIOMotorClient).
+Módulo de Conexión a la Base de Datos MongoDB.
 
-Este módulo carga las variables de entorno, configura la conexión a MongoDB,
-crea un cliente asíncrono y define funciones auxiliares para interactuar con la base de datos.
+Ubicación:
+    - Este módulo se encuentra en 'app/db/mongodb.py' y es el responsable de gestionar la conexión asíncrona a MongoDB utilizando Motor (AsyncIOMotorClient).
+
+Responsabilidades:
+    - Establecer una conexión asíncrona a MongoDB utilizando los parámetros de conexión definidos en 'app/config.py'.
+    - Proveer acceso a la base de datos configurada y definir colecciones específicas, como la colección de usuarios, que se utilizará para operaciones CRUD relacionadas.
+    - Facilitar una función auxiliar, 'check_connection', que verifica la conectividad a la base de datos mediante un comando 'ping', permitiendo diagnosticar problemas de conexión en tiempo de ejecución.
+    - Centralizar la configuración de la base de datos para que pueda ser reutilizada en otras partes de la aplicación.
+
+Estructura:
+    - Se importa la configuración global desde 'app/config.py' para obtener la URI de conexión (MONGO_URI) y el nombre de la base de datos (MONGO_DB).
+    - Se instancia un cliente asíncrono (AsyncIOMotorClient) utilizando la URI de conexión proporcionada.
+    - Se obtiene el objeto de la base de datos a partir del nombre definido en la configuración.
+    - Se define la colección 'users' para almacenar documentos relacionados con los usuarios.
+    - La función 'check_connection' es asíncrona y envía un comando 'ping' a la base de datos para verificar que la conexión esté operativa.
+
+Notas:
+    - Es fundamental que el archivo '.env' esté correctamente configurado y que 'app/config.py' contenga los valores necesarios para la conexión a MongoDB.
+    - La función 'check_connection' puede ser invocada en endpoints de monitoreo o durante las pruebas para asegurar la salud de la conexión a la base de datos.
+    - El uso de Motor permite aprovechar el modelo asíncrono de FastAPI para manejar múltiples solicitudes concurrentes de manera eficiente.
 """
 
-import os
-from dotenv import load_dotenv
 from motor.motor_asyncio import AsyncIOMotorClient
-from app.models import user_model  # Importación de modelos (asegúrate de utilizarlos según corresponda)
+from app import config
 
-# Cargar variables de entorno desde el archivo .env si existe.
-load_dotenv()
+# Crear el cliente asíncrono para MongoDB utilizando la URI definida en la configuración.
+client = AsyncIOMotorClient(config.MONGO_URI)
 
-# Obtener variables de entorno para la configuración de MongoDB.
-MONGO_HOST = os.getenv("MONGO_HOST", "mongo")
-MONGO_PORT = int(os.getenv("MONGO_PORT", 27017))
-MONGO_USER = os.getenv("MONGO_INITDB_ROOT_USERNAME", "admin")
-MONGO_PASSWORD = os.getenv("MONGO_INITDB_ROOT_PASSWORD", "password")
-MONGO_DB = os.getenv("MONGO_INITDB_DATABASE", "mydatabase")
+# Seleccionar la base de datos utilizando el nombre especificado en la configuración.
+db = client[config.MONGO_DB]
 
-# Construir la URI de conexión a MongoDB.
-MONGO_URI = f"mongodb://{MONGO_USER}:{MONGO_PASSWORD}@{MONGO_HOST}:{MONGO_PORT}/{MONGO_DB}?authSource=admin"
-
-# Crear el cliente asíncrono para MongoDB.
-client = AsyncIOMotorClient(MONGO_URI)
-
-# Seleccionar la base de datos.
-db = client[MONGO_DB]
-
-# Definir la colección de usuarios.
+# Definir la colección de usuarios, que se utilizará para operaciones relacionadas con los documentos de usuario.
 collection_name = "users"
 collection = db[collection_name]
 
@@ -37,16 +40,23 @@ async def check_connection():
     """
     Verifica la conexión a MongoDB enviando un comando 'ping'.
 
+    Esta función asíncrona envía un comando 'ping' a la base de datos y evalúa la respuesta
+    para determinar si la conexión es exitosa. Es útil para diagnosticar y monitorear la salud
+    de la conexión a MongoDB.
+
     Returns:
-        str: Mensaje indicando si la conexión fue exitosa, fallida o si ocurrió un error.
+        str: Un mensaje que indica el estado de la conexión:
+             - "✅ Conexión exitosa a MongoDB" si el comando 'ping' responde correctamente.
+             - "⚠️ No se pudo conectar a MongoDB" si la respuesta no indica éxito.
+             - Un mensaje de error detallado en caso de excepción.
     """
     try:
         # Enviar el comando 'ping' a la base de datos.
         result = await db.command("ping")
-        if result["ok"] == 1.0:
+        if result.get("ok") == 1.0:
             return "✅ Conexión exitosa a MongoDB"
         else:
             return "⚠️ No se pudo conectar a MongoDB"
     except Exception as e:
-        # Retornar un mensaje de error en caso de excepción.
+        # Retornar un mensaje de error en caso de que ocurra alguna excepción.
         return f"❌ Error de conexión: {e}"

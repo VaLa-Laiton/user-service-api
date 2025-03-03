@@ -50,7 +50,8 @@ async def create_user(user_data: dict):
             "phone_number": user_dict["phone_number"],
             "full_name": user_dict["full_name"],
             "password": user_dict["password"],
-            "avatar_url": user_dict["avatar_url"]
+            "avatar_url": user_dict["avatar_url"],
+            "user_role": user_dict["user_role"]
         }
 
         return {"success": True, "user": filtered_user}
