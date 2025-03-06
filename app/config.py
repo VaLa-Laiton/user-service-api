@@ -26,6 +26,7 @@ import os
 import pytz
 from dotenv import load_dotenv
 from pathlib import Path
+from bson import ObjectId
 
 # Cargar variables de entorno desde un archivo '.env' ubicado en la raíz del proyecto.
 env_path = Path('.') / '.env'
@@ -71,3 +72,21 @@ JWT_ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("JWT_ACCESS_TOKEN_EXPIRE_MINUTES
 # Configuración de Zona Horaria
 # ---------------------------------
 TIME_ZONE = pytz.timezone(os.getenv("TIME_ZONE", "America/Bogota"))
+
+# ---------------------------------
+# Configuración de la clase que se encarga de validar que el tipo de dato sea un ObjectId
+# ---------------------------------
+class PyObjectId(ObjectId):
+    @classmethod
+    def __get_validators__(cls):
+        yield cls.validate
+        
+    @classmethod
+    def validate(cls, v):
+        if not ObjectId.is_valid(v):
+            raise ValueError("Invalid ObjectId")
+        return ObjectId(v)
+    
+    @classmethod
+    def __modify_schema__(cls, field_schema):
+        field_schema.update(type="string")
