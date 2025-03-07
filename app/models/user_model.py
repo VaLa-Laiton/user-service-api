@@ -1,43 +1,109 @@
-from pydantic import BaseModel, EmailStr, Field, AnyUrl, StringConstraints, PositiveInt
-from typing import Optional, Literal
+"""
+Módulo de Modelos de Datos para Usuarios.
+
+Ubicación:
+    - Este módulo se encuentra en 'app/models/user_model.py' y define la estructura y validación de la información
+      relacionada con los usuarios de la aplicación.
+
+Responsabilidades:
+    - Validar y estructurar los datos de los usuarios mediante Pydantic, garantizando que la información cumpla
+      con las restricciones y formatos esperados.
+    - Facilitar la interacción con la base de datos MongoDB mediante el mapeo de campos, por ejemplo, mapeando '_id'
+      de MongoDB al campo 'id' del modelo.
+    - Definir campos esenciales del usuario, tales como credenciales, datos personales, estado de la cuenta, roles y
+      metadatos de auditoría (fechas de creación, actualización, eliminación, etc.).
+
+Notas:
+    - Este modelo debe mantenerse sincronizado con el esquema definido en USER_SCHEMA.py. Cada modificación en la
+      estructura de este modelo debe reflejarse en el esquema correspondiente.
+    - La zona horaria utilizada para los campos de fecha se importa desde 'app/config.py', garantizando así la
+      consistencia en el manejo temporal a nivel global en la aplicación.
+"""
+
+from pydantic import BaseModel, Field, EmailStr, AnyUrl, PositiveInt, constr
+from typing import Optional, Literal, Annotated
 from datetime import datetime
-from typing import Annotated
-from app.models.userRoles import UserRole
-import pytz
+from app.config import TIME_ZONE, PyObjectId  # Importamos PyObjectId desde app.config
 
-# Define la zona horaria deseada
-time_zone = pytz.timezone('America/Bogota')
-
-# Nota para mi yo futuro: ⚠️ Este dato debe validarse de forma independiente al modelo para proporcionar una respuesta más clara y comprensible para el usuario. => ref: *|⚠️⚠️⚠️|*
-# Nota para mi yo futuro. Siempre que añadar un campo AQUÍ, tambien debes añadirlo al USER_SCHEMA.py❗❗❗
-
-class Users(BaseModel):
+class User(BaseModel):
     """
     Modelo de datos para representar a un usuario en el sistema.
 
-    Este modelo se utiliza para validar y estructurar los datos de los usuarios,
-    incluyendo información personal, credenciales, estado y metadatos de auditoría.
+    Incluye:
+      - Identificador (_id) generado por MongoDB.
+      - Relaciones: role_id y company_id (referencias a Role y Company).
+      - Datos personales, credenciales, perfil y auditoría.
     """
-    id: Optional[str] = Field(None, alias="_id")  # MongoDB asigna _id automáticamente si no se proporciona
-    username: str = Field(..., min_length=3, max_length=50)  # Nombre de usuario con mínimo 3 y máximo 50 caracteres *|⚠️⚠️⚠️|*
-    email: EmailStr  # Validación automática de correo electrónico *|⚠️⚠️⚠️|*
-    phone_number: Optional[PositiveInt] = 0  # Número de teléfono del usuario *|⚠️⚠️⚠️|*
-    full_name: Annotated[str, StringConstraints(min_length=3, max_length=50, pattern=r"^[a-zA-ZÀ-ÖØ-öø-ÿ\s]+$")]  # Nombre completo del usuario *|⚠️⚠️⚠️|*
-    password: str  # Contraseña almacenada en formato hash *|⚠️⚠️⚠️|*
-    avatar_url: AnyUrl = None  # URL de la foto de perfil del usuario *|⚠️⚠️⚠️|*
-    state: Literal["active", "inactive", "banned"] = "active"  # Estado del usuario
-    user_role: UserRole = UserRole.TECHNICAL  # Enum de los roles de usuarios disponibles
-    is_active: bool = True  # Indica si el usuario está activo
-
-    last_login: Optional[datetime] = None  # Fecha del último inicio de sesión
-    created_at: datetime = Field(default_factory=lambda: datetime.now(time_zone))  # Fecha de creación
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(time_zone))  # Fecha de última modificación
-    deleted_at: Optional[datetime] = None  # Fecha de eliminación (None si no ha sido eliminado)
-    is_deleted: bool = False  # Indica si el usuario ha sido eliminado (eliminación lógica)
+    id: Optional[PyObjectId] = Field(
+        default=None, alias="_id", 
+        description="Identificador único generado por MongoDB."
+    )
+    role_id: Optional[PyObjectId] = Field(
+        default=None, 
+        description="Referencia al rol asignado al usuario (colección Role)."
+    )
+    company_id: Optional[PyObjectId] = Field(
+        default=None, 
+        description="Referencia a la compañía asociada al usuario (colección Company)."
+    )
+    username: str = Field(
+        ..., min_length=3, max_length=50, 
+        description="Nombre de usuario único."
+    )
+    email: EmailStr = Field(
+        ..., 
+        description="Correo electrónico único y válido."
+    )
+    phone_number: Optional[PositiveInt] = Field(
+        None, 
+        description="Número de teléfono (valor numérico positivo)."
+    )
+    full_name: Annotated[
+        str,
+        constr(min_length=3, max_length=50, regex=r"^[a-zA-ZÀ-ÖØ-öø-ÿ\s]+$")
+    ] = Field(
+        ..., 
+        description="Nombre completo, compuesto solo por letras y espacios."
+    )
+    password: str = Field(
+        ..., 
+        description="Contraseña almacenada en formato hash."
+    )
+    is_temp_password: bool = Field(
+        default=False, 
+        description="Indica si la contraseña actual es temporal."
+    )
+    avatar_url: Optional[AnyUrl] = Field(
+        None, 
+        description="URL de la foto de perfil del usuario."
+    )
+    state: Literal["active", "inactive", "banned"] = Field(
+        default="active", 
+        description="Estado de la cuenta del usuario."
+    )
+    last_login: Optional[datetime] = Field(
+        None, 
+        description="Fecha y hora del último inicio de sesión."
+    )
+    created_at: datetime = Field(
+        default_factory=lambda: datetime.now(TIME_ZONE), 
+        description="Fecha y hora en que se creó el usuario."
+    )
+    updated_at: datetime = Field(
+        default_factory=lambda: datetime.now(TIME_ZONE), 
+        description="Fecha y hora de la última actualización del registro."
+    )
+    deleted_at: Optional[datetime] = Field(
+        None, 
+        description="Fecha y hora en que se marcó como eliminado el usuario (eliminación lógica)."
+    )
+    is_deleted: bool = Field(
+        default=False, 
+        description="Indicador de eliminación lógica del usuario."
+    )
 
     class Config:
-        """
-        Configuración adicional para el modelo Users.
-        """
-        populate_by_name = True  # Permite mapear "_id" a "id"
-        from_attributes = True  # Habilita la compatibilidad con MongoDB
+        json_encoders = {PyObjectId: str}
+        allow_population_by_field_name = True
+        populate_by_name = True
+        from_attributes = True

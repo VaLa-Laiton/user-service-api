@@ -58,7 +58,7 @@ async def auth_register(user: user_schema.UserCreate, request: Request):
     json_compatible_saved_user = jsonable_encoder(saved_user)
 
     # Generar el JWT con el ID del usuario recién creado
-    access_token = auth.create_jwt({"user_id": json_compatible_saved_user["user"]["_id"]})
+    access_token = auth.create_jwt({"user_id": json_compatible_saved_user["user"]["_id"], "user_role": json_compatible_saved_user["user"]["user_role"]})
 
     # Devolver una respuesta con HTTP 201 (Created)
     return JSONResponse(
