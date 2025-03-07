@@ -10,12 +10,14 @@ Responsabilidades:
     - Configurar la conexión a la base de datos MongoDB a partir de variables de entorno, construyendo la URI de conexión.
     - Establecer la configuración para la autenticación JWT, incluyendo la carga de claves RSA (archivos PEM), algoritmo y tiempo de expiración del token.
     - Configurar la zona horaria de la aplicación utilizando la librería 'pytz'.
+    - Incluir la validación y serialización de identificadores MongoDB (ObjectId) mediante la clase 'PyObjectId', facilitando su integración en frameworks de validación como Pydantic.
 
 Estructura:
     - Se obtienen los valores de configuración mediante 'os.getenv', proporcionando valores por defecto cuando no se encuentran definidos.
     - La conexión a MongoDB se configura mediante una URI que integra usuario, contraseña, host, puerto y nombre de base de datos.
     - Las claves RSA (privada y pública) se cargan desde archivos PEM ubicados en el directorio superior a 'app'.
     - La zona horaria se establece a partir de la variable de entorno 'TIME_ZONE', con un valor por defecto de "America/Bogota".
+    - Se incorpora la clase 'PyObjectId' para validar y serializar ObjectId, mejorando la integración con herramientas de validación y documentación.
 
 Notas:
     - Es esencial contar con un archivo '.env' en la raíz del proyecto que contenga las variables necesarias.
@@ -74,9 +76,23 @@ JWT_ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("JWT_ACCESS_TOKEN_EXPIRE_MINUTES
 TIME_ZONE = pytz.timezone(os.getenv("TIME_ZONE", "America/Bogota"))
 
 # ---------------------------------
-# Configuración de la clase que se encarga de validar que el tipo de dato sea un ObjectId
+# Validación y Serialización de ObjectId
 # ---------------------------------
 class PyObjectId(ObjectId):
+    """
+    Clase que extiende la funcionalidad de 'ObjectId' para integrar validadores personalizados y 
+    modificar el esquema del campo, facilitando su uso en frameworks de validación y serialización 
+    (por ejemplo, Pydantic).
+
+    Métodos:
+        __get_validators__:
+            Retorna un generador de validadores, asegurando que el valor proporcionado es un ObjectId válido.
+        validate:
+            Verifica que el valor dado sea un ObjectId válido; en caso contrario, lanza un ValueError.
+        __modify_schema__:
+            Actualiza el esquema del campo a tipo 'string' para mejorar la integración con herramientas de documentación.
+    """
+    
     @classmethod
     def __get_validators__(cls):
         yield cls.validate

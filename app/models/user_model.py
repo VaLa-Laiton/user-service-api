@@ -10,14 +10,18 @@ Responsabilidades:
       con las restricciones y formatos esperados.
     - Facilitar la interacción con la base de datos MongoDB mediante el mapeo de campos, por ejemplo, mapeando '_id'
       de MongoDB al campo 'id' del modelo.
-    - Definir campos esenciales del usuario, tales como credenciales, datos personales, estado de la cuenta, roles y
-      metadatos de auditoría (fechas de creación, actualización, eliminación, etc.).
+    - Definir campos esenciales del usuario, incluyendo credenciales, datos personales, relaciones (con Role y Company)
+      y metadatos de auditoría (fechas de creación, actualización, eliminación, etc.).
+    - Incluir validaciones adicionales:
+         • El campo full_name se valida con una expresión regular que permite únicamente letras (incluyendo caracteres acentuados)
+           y espacios.
+         • El campo state se restringe a los valores "active", "inactive" o "banned".
 
 Notas:
     - Este modelo debe mantenerse sincronizado con el esquema definido en USER_SCHEMA.py. Cada modificación en la
       estructura de este modelo debe reflejarse en el esquema correspondiente.
-    - La zona horaria utilizada para los campos de fecha se importa desde 'app/config.py', garantizando así la
-      consistencia en el manejo temporal a nivel global en la aplicación.
+    - La zona horaria utilizada para los campos de fecha se importa desde 'app/config.py', garantizando la consistencia
+      en el manejo temporal a nivel global en la aplicación.
 """
 
 from pydantic import BaseModel, Field, EmailStr, AnyUrl, PositiveInt, constr
@@ -32,7 +36,10 @@ class User(BaseModel):
     Incluye:
       - Identificador (_id) generado por MongoDB.
       - Relaciones: role_id y company_id (referencias a Role y Company).
-      - Datos personales, credenciales, perfil y auditoría.
+      - Datos personales, credenciales, perfil y metadatos de auditoría.
+      - Validaciones específicas, como:
+            • El campo full_name solo acepta letras y espacios.
+            • El campo state está restringido a "active", "inactive" o "banned".
     """
     id: Optional[PyObjectId] = Field(
         default=None, alias="_id", 
@@ -102,8 +109,18 @@ class User(BaseModel):
         description="Indicador de eliminación lógica del usuario."
     )
 
-    class Config:
-        json_encoders = {PyObjectId: str}
-        allow_population_by_field_name = True
-        populate_by_name = True
-        from_attributes = True
+class Config:
+    # Define cómo se serializan los objetos de tipo PyObjectId en salidas JSON, convirtiéndolos a cadenas.
+    json_encoders = {PyObjectId: str}
+    
+    # Permite que los campos del modelo sean poblados utilizando sus nombres definidos en el modelo,
+    # además de sus alias, lo que facilita la asignación de valores durante la instanciación.
+    allow_population_by_field_name = True
+    
+    # Habilita la población de datos en el modelo utilizando los nombres de los campos, asegurando que
+    # se puedan asignar valores correctamente incluso cuando se usan alias.
+    populate_by_name = True
+    
+    # Permite crear instancias del modelo a partir de objetos que tengan atributos coincidentes con los campos
+    # definidos en el modelo, facilitando la conversión y la interoperabilidad de datos.
+    from_attributes = True
